@@ -8,10 +8,32 @@ import { motion, AnimatePresence } from "motion/react";
 import gsap from "gsap";
 
 const MosaicReveal = ({ src }: { src: string }) => {
-  const grid = 4; // 4x4
+  const grid = 4;
   const total = grid * grid;
-  const [indices, setIndices] = useState<number[]>([]);
+  const containerRef = useRef<HTMLDivElement>(null);
 
+  // Mobile: IntersectionObserver triggers CSS class-based spring animation
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    // Only attach observer for mobile viewports
+    if (window.innerWidth >= 768) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.classList.add('is-visible');
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.15 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  // Desktop: keep original random-stagger framer-motion animation
+  const [indices, setIndices] = useState<number[]>([]);
   useEffect(() => {
     const arr = Array.from({ length: total }, (_, i) => i);
     for (let i = arr.length - 1; i > 0; i--) {
@@ -22,31 +44,38 @@ const MosaicReveal = ({ src }: { src: string }) => {
   }, [total]);
 
   return (
-    <div className="grid grid-cols-4 grid-rows-4 w-full h-full gap-0">
+    <div ref={containerRef} className="mosaic-container grid grid-cols-4 grid-rows-4 w-full h-full gap-0">
       {Array.from({ length: total }).map((_, i) => {
         const x = i % grid;
         const y = Math.floor(i / grid);
-        const delay = indices.indexOf(i) * 0.05;
+        const bgStyle = {
+          backgroundImage: `url(${src})`,
+          backgroundSize: `${grid * 100}% ${grid * 100}%`,
+          backgroundPosition: `${(x / (grid - 1)) * 100}% ${(y / (grid - 1)) * 100}%`,
+          backgroundRepeat: 'no-repeat' as const,
+        };
 
         return (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, scale: 0.8 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{
-              delay,
-              duration: 0.4,
-              ease: [0.16, 1, 0.3, 1]
-            }}
-            style={{
-              backgroundImage: `url(${src})`,
-              backgroundSize: `${grid * 100}% ${grid * 100}%`,
-              backgroundPosition: `${(x / (grid - 1)) * 100}% ${(y / (grid - 1)) * 100}%`,
-              backgroundRepeat: 'no-repeat'
-            }}
-            className="w-full h-full"
-          />
+          // Mobile: pure CSS block with --index for stagger delay
+          // Desktop: framer-motion random-order reveal (hidden on mobile via md: class)
+          <>
+            {/* Mobile block */}
+            <div
+              key={`m-${i}`}
+              className="mosaic-block md:hidden w-full h-full"
+              style={{ ...bgStyle, ['--index' as string]: i }}
+            />
+            {/* Desktop block */}
+            <motion.div
+              key={`d-${i}`}
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: indices.indexOf(i) * 0.05, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              style={bgStyle}
+              className="hidden md:block w-full h-full"
+            />
+          </>
         );
       })}
     </div>
@@ -233,7 +262,7 @@ export default function App() {
     const handleScroll = () => {
       const scrollTop = window.scrollY;
       const isMobile = window.innerWidth < 768;
-      const sectionHeight = window.innerHeight * (isMobile ? 0.5 : 2.5);
+      const sectionHeight = window.innerHeight * (isMobile ? 2.0 : 2.5);
       const scrollFraction = Math.min(1, Math.max(0, scrollTop / sectionHeight));
       const frameIndex = Math.min(frameCount - 1, Math.floor(scrollFraction * frameCount));
       requestAnimationFrame(() => {
@@ -282,8 +311,12 @@ export default function App() {
     // Hide secondary elements completely
     gsap.set([canvasWrapper, navRight, navLeft].filter(Boolean), { opacity: 0, y: 20 });
 
-    // Center the name on the full viewport by shifting it down from its natural position
-    const centerOffset = window.innerHeight * 0.25;
+    // Center the name on the full viewport by calculating the difference between its natural top and the center
+    const nameRect = nameEl.getBoundingClientRect();
+    const currentTop = nameRect.top;
+    const targetTop = (window.innerHeight / 2) - (nameRect.height / 2);
+    const centerOffset = targetTop - currentTop;
+
     gsap.set(nameEl, {
       y: centerOffset,
       opacity: 0,
@@ -291,23 +324,28 @@ export default function App() {
       zIndex: 100,
     });
 
-    // ── Build Timeline ──
-    const tl = gsap.timeline();
+    // ── Animation Start ──
+    const tl = gsap.timeline({
+      delay: 0.1,
+    });
 
-    // Step 1: Blur-fade the name from invisible+blurry to sharp and solid
+    // Phase 1: Sudden pop-in (heavy blur fade) in the center
     tl.to(nameEl, {
       opacity: 1,
       filter: "blur(0px)",
-      duration: 1.4,
-      ease: "power3.out",
+      duration: 1.2,
+      ease: "power2.out",
     });
 
-    // Step 2: Hold 0.5s, then migrate name upward to its final natural position
-    // We add both the horizontal stretch (scaleX) and the previous vertical stretch (scaleY)
+    // Shift its resting position slightly and pause
+    tl.to({}, { duration: 0.4 });
+
+    // Phase 2: Migrate to the top (final position)
     tl.to(nameEl, {
+      x: 0,
       y: 0,
-      scaleX: 1.1, // Requested horizontal stretch
-      scaleY: 1.6, // Restoring your preferred vertical stretch
+      scaleX: 1.15, // Moderate horizontal stretch to fill the right gap
+      scaleY: 1.85, // Increased vertical stretch
       transformOrigin: "top left",
       duration: 1.1,
       ease: "power3.inOut",
@@ -341,13 +379,13 @@ export default function App() {
           transition: "opacity 0.5s ease-out"
         }}
       >
-        <div className="relative h-[150vh] md:h-[350vh]">
-          <div className="sticky top-0 h-screen w-full flex flex-col-reverse md:flex-row-reverse overflow-hidden" style={{ backgroundColor: bgColor }}>
+        <div className="relative h-[300vh] md:h-[350vh]">
+          <div className="sticky top-0 h-screen w-full flex flex-col-reverse justify-between md:justify-start md:flex-row-reverse overflow-hidden" style={{ backgroundColor: bgColor }}>
 
             {/* Pinned Nav — RIGHT */}
             <div
               ref={mobilePinnedNavRightRef}
-              className="absolute top-4 right-6 md:top-12 md:right-12 font-mono text-[8px] md:text-[10px] tracking-widest uppercase text-white/40 flex items-center gap-4 z-20"
+              className="absolute top-4 right-6 md:top-12 md:right-12 font-mono text-[8px] md:text-[10px] tracking-widest uppercase text-white/40 flex flex-col items-end md:flex-row md:items-center gap-1 md:gap-4 z-20"
             >
               <span>01 / 04</span>
               <div className="w-8 md:w-16 h-[1px] bg-white/40" />
@@ -357,7 +395,7 @@ export default function App() {
             {/* Pinned Nav — LEFT */}
             <div
               ref={mobilePinnedNavLeftRef}
-              className="absolute top-4 left-6 md:top-12 md:left-20 font-mono text-[8px] md:text-[10px] tracking-widest uppercase text-white/40 flex items-center gap-4 z-20"
+              className="absolute top-4 left-6 md:top-12 md:left-20 font-mono text-[8px] md:text-[10px] tracking-widest uppercase text-white/40 flex flex-col items-start md:flex-row md:items-center gap-1 md:gap-4 z-20"
             >
               <span>2026</span>
               <div className="w-8 md:w-16 h-[1px] bg-white/40" />
@@ -367,7 +405,7 @@ export default function App() {
             {/* Bottom Half on Mobile: Video/Canvas */}
             <div
               ref={mobileCanvasWrapperRef}
-              className="relative w-full md:flex-1 flex items-end justify-center md:items-center pb-0 px-4 md:p-12"
+              className="relative w-full md:flex-1 flex items-start justify-center md:items-center md:mt-0 pb-24 md:pb-0 px-4 md:p-12"
             >
               <div className="relative w-full aspect-square max-w-4xl z-10 md:mt-0">
                 <canvas ref={canvasRef} className="w-full h-full" />
@@ -375,8 +413,8 @@ export default function App() {
             </div>
 
             {/* Top Half on Mobile: Branding */}
-            <div className="relative flex-1 flex flex-col justify-start items-start pt-20 md:pt-0 pb-4 md:pb-0 md:pl-20 px-4 z-10 w-full">
-              <div className="flex flex-col items-start md:items-start text-left md:text-left w-full max-w-2xl mt-4 md:mt-8">
+            <div className="relative flex-none md:flex-1 flex flex-col justify-start md:justify-center items-start pt-[116px] md:pt-0 mt-0 md:mt-0 pb-4 md:pb-0 md:pl-20 px-4 z-10 w-full">
+              <div className="flex flex-col items-start md:items-start text-left md:text-left w-full max-w-2xl md:mt-0">
                 <div className="flex flex-col w-full items-start md:items-start select-none">
 
                   {/* ── Mobile Name Block (GSAP-animated) ── */}
@@ -387,7 +425,7 @@ export default function App() {
                       fontFamily: '"Anton", sans-serif',
                       lineHeight: 0.8,
                       letterSpacing: '-0.02em',
-                      fontSize: 'clamp(4.5rem, 18vw, 12rem)',
+                      fontSize: 'clamp(3rem, 16vw, 12rem)',
                     }}
                   >
                     {/* Top Row — MOHAMMED */}
@@ -399,7 +437,7 @@ export default function App() {
 
                     {/* Bottom Row — SABITH */}
                     <div className="w-full text-left whitespace-nowrap mt-4">
-                      <span className="text-[#f97316]" style={{ textShadow: "0 0 40px rgba(249,115,22,0.4)" }}>
+                      <span className="text-[#f97316]" style={{ textShadow: "0 0 40px rgba(249,115,22,0.4)", letterSpacing: "0.02em" }}>
                         {bottomWord}
                       </span>
                     </div>

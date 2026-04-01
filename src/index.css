@@ -26,3 +26,19 @@
 .animate-slam {
   animation: slamIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* ── Mobile Mosaic Reveal (About Me portrait) ── */
+@media (max-width: 767px) {
+  .mosaic-container .mosaic-block {
+    transform: translateY(150px);
+    opacity: 0;
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+                opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition-delay: calc(var(--index) * 0.05s);
+  }
+
+  .mosaic-container.is-visible .mosaic-block {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
