@@ -274,8 +274,7 @@ export default function App() {
     const handleResize = () => {
       const parent = canvas.parentElement;
       if (parent) {
-        const isMobile = window.innerWidth < 768;
-        const size = isMobile ? parent.clientWidth : Math.min(parent.clientWidth, parent.clientHeight);
+        const size = Math.min(parent.clientWidth, parent.clientHeight);
         if (size > 0) {
           canvas.width = size;
           canvas.height = size;
@@ -298,12 +297,16 @@ export default function App() {
   useEffect(() => {
     if (isLoading) return;
     const isMobile = window.innerWidth < 768;
-    if (!isMobile) return;
 
     const nameEl = mobileNameRef.current;
     const canvasWrapper = mobileCanvasWrapperRef.current;
     const navRight = mobilePinnedNavRightRef.current;
     const navLeft = mobilePinnedNavLeftRef.current;
+
+    if (!isMobile) {
+      if (canvasWrapper) gsap.set(canvasWrapper, { opacity: 1, y: 0, scale: 1 });
+      return;
+    }
 
     if (!nameEl) return;
 
@@ -405,10 +408,10 @@ export default function App() {
             {/* Bottom Half on Mobile: Video/Canvas */}
             <div
               ref={mobileCanvasWrapperRef}
-              className="relative w-full md:flex-1 flex items-start justify-center md:items-center md:mt-0 pb-24 md:pb-0 px-4 md:p-12"
+              className="relative w-full flex-1 min-h-0 flex items-center justify-center md:mt-0 pb-4 md:pb-0 px-4 md:p-12"
             >
-              <div className="relative w-full aspect-square max-w-4xl z-10 md:mt-0">
-                <canvas ref={canvasRef} className="w-full h-full" />
+              <div className="relative w-full h-full max-w-4xl z-10 md:mt-0 flex items-center justify-center">
+                <canvas ref={canvasRef} className="max-w-full max-h-full aspect-square" />
               </div>
             </div>
 
@@ -507,11 +510,14 @@ export default function App() {
         </div>
 
         {/* About Me Section */}
-        <section className="bg-[#f5f5dc] text-black h-screen flex flex-col md:flex-row items-stretch overflow-hidden">
-          <div className="w-full h-[50vh] md:h-screen md:w-1/2 relative bg-[#f5f5dc] overflow-hidden flex items-center justify-center">
-            <div className="w-full aspect-square md:h-full md:w-auto flex items-center justify-center">
+        <section className="text-black flex flex-col md:flex-row items-stretch overflow-hidden min-h-screen" style={{ backgroundColor: '#f5f0e8' }}>
+
+          {/* IMAGE — top on mobile, left on desktop */}
+          <div className="w-full md:w-1/2 order-first md:order-none relative overflow-hidden flex items-center justify-center bg-[#f5f0e8]">
+            <div className="w-full aspect-square md:w-auto md:h-screen md:max-h-screen md:aspect-square flex items-center justify-center">
               <MosaicReveal src="https://raw.githubusercontent.com/sabism12/PORTFOLIO/main/portrait/Whisk_6686b85e16b3fb0a6754b85d88a96a5ceg.png" />
             </div>
+            {/* Desktop sidebar badge */}
             <div className="absolute right-0 top-1/2 -translate-y-1/2 hidden md:flex bg-black text-white px-4 py-8 flex-col items-center gap-4 rounded-sm shadow-2xl z-10">
               <span className="font-bold text-2xl">S.</span>
               <div className="h-24 w-[1px] bg-white/20" />
@@ -519,27 +525,74 @@ export default function App() {
             </div>
           </div>
 
-          <div className="w-full h-[50vh] md:h-screen md:w-1/2 flex flex-col justify-center p-4 md:p-24 bg-[#f5f5dc] overflow-hidden">
+          {/* TEXT — below image on mobile, right on desktop */}
+          <div className="w-full md:w-1/2 flex flex-col justify-center px-6 py-10 md:p-24 overflow-hidden" style={{ backgroundColor: '#f5f0e8' }}>
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.2 }}
+              className="flex flex-col items-start"
             >
-              <h2 className="font-display text-[9px] md:text-xs tracking-[0.5em] uppercase opacity-40 mb-2 md:mb-8 flex items-center gap-4">
-                <div className="w-4 md:w-8 h-[1px] bg-black" />
-                About Me
+              {/* Label */}
+              <div className="flex items-center gap-3 mb-4 md:mb-6">
+                <div className="w-6 md:w-10 h-[2px]" style={{ backgroundColor: '#e85d1a' }} />
+                <span className="text-[10px] md:text-xs tracking-[0.4em] uppercase font-bold" style={{ color: '#e85d1a', opacity: 0.7 }}>
+                  Portfolio / 2026
+                </span>
+              </div>
+
+              {/* Main heading — orange, bold, impact-style like screenshot */}
+              <h2
+                className="font-black uppercase leading-[0.9] mb-6 md:mb-10"
+                style={{
+                  fontFamily: 'Impact, "Arial Black", sans-serif',
+                  fontSize: 'clamp(2.4rem, 8vw, 5rem)',
+                  color: '#e85d1a',
+                  letterSpacing: '-0.01em',
+                }}
+              >
+                STRUCTURAL<br />ENGINEER
               </h2>
-              <div className="text-xl md:text-4xl font-bold leading-[1.2] tracking-tight mb-4 md:mb-8 text-black">
-                Iam Structural Design Engineer specializing in high-rise and industrial steel structures, with strong expertise in analysis-driven design.
-              </div>
-              <div className="text-[12px] md:text-base opacity-70 leading-relaxed max-w-xl text-black">
-                Experienced in forensic engineering, structural retrofitting, and verification through FEA and manual hand calculations. Delivering safe, code-compliant designs across all stages.
-              </div>
-              <div className="mt-4 md:mt-12 flex gap-4">
-                <div className="px-4 py-2 md:px-6 md:py-3 border border-black/10 rounded-full text-[8px] md:text-[10px] font-bold tracking-widest uppercase hover:bg-black hover:text-white transition-colors cursor-pointer text-black">
+
+              {/* Body copy */}
+              <p
+                className="mb-6 md:mb-10 font-sans tracking-wide"
+                style={{ 
+                  color: '#e85d1a', 
+                  fontSize: 'clamp(1rem, 2.5vw, 1.4rem)', 
+                  lineHeight: '1.4',
+                  maxWidth: '45ch',
+                  fontWeight: 400
+                }}
+              >
+                Specializing in high-rise and industrial steel structures, with strong expertise in analysis-driven design. Experienced in forensic engineering, structural retrofitting, and verification through FEA and manual hand calculations. Proven ability to deliver safe, code-compliant designs across design, BIM, and construction stages, with a clear focus on technical excellence and chartership development through IStructE.
+              </p>
+
+              {/* CTA */}
+              <div className="flex gap-4 mt-2">
+                <a
+                  href="https://drive.google.com/file/d/1nXl56qr49xzO45P3B3MRWhPoZAlYczge/view?usp=sharing"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-5 py-2.5 md:px-7 md:py-3 text-[9px] md:text-[11px] font-bold tracking-widest uppercase cursor-pointer transition-all duration-300"
+                  style={{
+                    border: '2px solid #e85d1a',
+                    color: '#e85d1a',
+                    borderRadius: '999px',
+                    textDecoration: 'none'
+                  }}
+                  onMouseEnter={e => {
+                    (e.currentTarget as HTMLAnchorElement).style.backgroundColor = '#e85d1a';
+                    (e.currentTarget as HTMLAnchorElement).style.color = '#fff';
+                  }}
+                  onMouseLeave={e => {
+                    (e.currentTarget as HTMLAnchorElement).style.backgroundColor = 'transparent';
+                    (e.currentTarget as HTMLAnchorElement).style.color = '#e85d1a';
+                  }}
+                >
                   Download CV
-                </div>
+                </a>
               </div>
             </motion.div>
           </div>
