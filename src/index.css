@@ -41,4 +41,386 @@
     transform: translateY(0);
     opacity: 1;
   }
+
+  /* Mobile: About pinned, Projects slides over (premium depth) */
+  .about-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 0;
+  }
+
+  .about-sticky-fx {
+    height: 100svh !important;
+    min-height: 100svh !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: stretch;
+    transform-origin: 50% 50%;
+    transform: perspective(1200px) translateY(var(--about-y, 0px)) translateZ(var(--about-z, 0px)) scale(var(--about-scale, 1));
+    filter: blur(var(--about-blur, 0px));
+    opacity: var(--about-opacity, 1);
+    will-change: transform, filter;
+  }
+
+  /* Make About fit on small screens like S23 */
+  .about-text {
+    flex: 1 1 auto;
+    min-height: 0;
+    justify-content: flex-start;
+    padding: 16px 18px !important;
+    overflow: hidden;
+  }
+
+  .about-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    overflow: hidden; /* no scrolling inside About on short phones */
+  }
+
+  .about-cta {
+    flex: 0 0 auto;
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+  }
+
+  /* About: strict 100vh fit (text scales, photo unchanged) */
+  .about-sticky-fx {
+    height: 100vh !important;
+    min-height: 100vh !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* Fluid text sizing based on viewport height */
+  .about-text h2 {
+    /* Keep "tall phones" large; don't scale down unless height query triggers */
+    font-size: clamp(2.2rem, 9vw, 3.0rem) !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .about-text p {
+    font-size: clamp(1rem, 3.6vw, 1.1rem) !important;
+    line-height: 1.45 !important;
+    margin-bottom: 0.9rem !important;
+  }
+
+  /* Tighten vertical spacing on short screens */
+  @media (max-width: 767px) and (max-height: 750px) {
+    .about-text {
+      padding: 12px 16px !important;
+    }
+
+    .about-text h2 {
+      font-size: clamp(1.9rem, 8.2vw, 2.6rem) !important;
+      margin-bottom: 0.5rem !important;
+    }
+
+    .about-text p {
+      /* Smart scaling only when screen height demands it */
+      font-size: clamp(12px, 2.5vh, 16px) !important;
+      line-height: 1.3 !important;
+      margin-bottom: 0.65rem !important;
+    }
+  }
+
+  .projects-overlay {
+    position: relative;
+    z-index: 10;
+    background: transparent; /* cards-only overlay; About acts as background */
+    border: 0 !important;
+    box-shadow: none !important;
+    height: 190vh;
+    overflow: visible !important;
+  }
+
+  .projects-overlay-inner {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    transform: translateY(var(--projects-y, 36px)) scale(var(--projects-scale, 0.985));
+    opacity: var(--projects-opacity, 0.68);
+    filter: blur(var(--projects-blur, 8px));
+    will-change: transform, opacity, filter;
+  }
+
+  /* After Projects reaches the top, keep cards frozen so the footer can slide over them. */
+  .projects-overlay.is-frozen .projects-overlay-inner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 10;
+  }
+
+  .projects-scroll-buffer {
+  height: 40vh; 
+}
+
+  .projects-mobile-shell,
+  .projects-analysis-shell {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .projects-analysis-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 9999;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    background: #000 !important;
+  }
+
+  .projects-mobile-shell {
+    width: 100%;
+    height: 100vh;
+    min-height: 100vh;
+    justify-content: flex-start;
+    padding-top: clamp(18px, 4vh, 32px) !important;
+    padding-bottom: clamp(20px, 4vh, 36px) !important;
+    overflow: visible !important;
+  }
+
+  .project-card-glass {
+    /* Slightly narrower than the viewport so the next card "peeks" in */
+    flex: 0 0 var(--project-card-w, 72vw);
+    width: var(--project-card-w, 72vw);
+    height: clamp(480px, 72vh, 800px);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: linear-gradient(180deg, rgba(22, 22, 22, 0.88) 0%, rgba(10, 10, 10, 0.82) 100%) !important;
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow:
+      0 18px 42px rgba(0, 0, 0, 0.18),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+    isolation: isolate;
+    background-clip: padding-box;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+    transform-origin: center center;
+    z-index: 1;
+    transition:
+      transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 320ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 320ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform, opacity;
+  }
+
+  .project-card-glass.is-center {
+    position: relative !important;
+    z-index: 50 !important;
+    opacity: 1;
+    transform: scale(1) translateZ(1px) !important;
+    background: #1e1e1e !important;
+  }
+
+  .project-card-glass.is-peek-left {
+    z-index: 1 !important;
+    opacity: 0.5;
+    transform-origin: right center;
+    transform: scale(0.92);
+  }
+
+  .project-card-glass.is-peek-right {
+    z-index: 1 !important;
+    opacity: 0.5;
+    transform-origin: left center;
+    transform: scale(0.92);
+  }
+
+  .project-card-glass.is-center,
+  .project-card-glass.is-peek-left,
+  .project-card-glass.is-peek-right {
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
+
+  .project-card-glass.is-center {
+    border-color: rgba(255, 255, 255, 0.18) !important;
+    box-shadow:
+      0 18px 42px rgba(0, 0, 0, 0.18),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  .project-card-glass.is-peek-left,
+  .project-card-glass.is-peek-right {
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    box-shadow:
+      0 12px 28px rgba(0, 0, 0, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  .project-card-media {
+    flex: 0 0 auto;
+    aspect-ratio: 16 / 9;
+  }
+
+  .project-card-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex-grow: 1;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+
+  .project-card-content::-webkit-scrollbar {
+    display: none;
+  }
+
+  .projects-carousel {
+    --project-card-w: 85vw;
+    --project-card-overlap: 10vw; /* how much the next card peeks in */
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 0;
+    padding-top: 12px;
+    padding-bottom: 24px;
+    padding-left: calc((100vw - var(--project-card-w)) / 2);
+    padding-right: calc((100vw - var(--project-card-w)) / 2);
+    scroll-padding-left: calc((100vw - var(--project-card-w)) / 2);
+    scroll-padding-right: calc((100vw - var(--project-card-w)) / 2);
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    align-items: flex-start;
+    justify-content: flex-start;
+    scroll-behavior: smooth;
+    isolation: isolate;
+  }
+
+  .project-card-glass {
+    position: relative;
+  }
+
+  .project-card-glass:not(:first-child) {
+    margin-left: calc(-1 * var(--project-card-overlap, 10vw));
+  }
+
+  .projects-carousel::-webkit-scrollbar {
+    display: none;
+  }
+
+  .projects-carousel {
+    scrollbar-width: none;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+.portfolio-footer {
+  position: relative;
+  z-index: 30;
+  overflow: hidden;
+  background:
+    radial-gradient(1200px circle at 0% 0%, rgba(205, 146, 94, 0.18), transparent 55%),
+    radial-gradient(900px circle at 100% 10%, rgba(153, 97, 54, 0.14), transparent 50%),
+    linear-gradient(135deg, #120d0a 0%, #2a1b12 52%, #17100c 100%);
+}
+
+.portfolio-footer__link {
+  font-size: 18px;
+  letter-spacing: -0.01em;
+  color: rgba(255, 255, 255, 0.85);
+  opacity: 0.9;
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.portfolio-footer__link:hover {
+  opacity: 1;
+  transform: translateX(2px);
+}
+
+.portfolio-footer__top {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.02);
+  color: rgba(255, 255, 255, 0.9);
+  transition: transform 180ms ease, background 180ms ease, border-color 180ms ease;
+}
+
+.portfolio-footer__top:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.portfolio-footer__top:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.35);
+  outline-offset: 3px;
+}
+
+.portfolio-footer__name {
+  font-family: "Anton", var(--font-sans);
+  font-weight: 400;
+  font-size: clamp(3.2rem, 9vw, 5.6rem);
+  line-height: 0.85;
+  letter-spacing: 0.01em;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.portfolio-footer__role {
+  margin-top: 10px;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.portfolio-footer__email {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.55);
+  text-decoration: none;
+  transition: color 180ms ease;
+}
+
+.portfolio-footer__email:hover {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.about-me-text .about-word {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(30px);
+  will-change: transform, opacity;
 }
