@@ -20,10 +20,10 @@ export default function Footer() {
   };
 
   return (
-    <footer className="portfolio-footer px-6 md:px-10 py-12 md:py-16">
-      <div className="mx-auto w-full max-w-6xl">
-        <div className="flex items-start justify-between gap-6">
-          <nav aria-label="Social links" className="space-y-4">
+    <footer className="portfolio-footer px-6 md:px-10 pt-6 pb-12 md:py-16">
+      <div className="portfolio-footer__inner mx-auto w-full max-w-6xl">
+        <div className="portfolio-footer__top-row">
+          <nav aria-label="Social links" className="portfolio-footer__socials">
             {SOCIAL_LINKS.map((link) => (
               <a
                 key={link.label}
@@ -35,7 +35,7 @@ export default function Footer() {
                 {link.label}
               </a>
             ))}
-            <div className="portfolio-footer__link block w-fit" aria-label="Coordinates">
+            <div className="portfolio-footer__link portfolio-footer__coordinates" aria-label="Coordinates">
               {COORDINATES}
             </div>
           </nav>
@@ -50,15 +50,18 @@ export default function Footer() {
           </button>
         </div>
 
-        <div className="mt-16 md:mt-24 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-          <div>
-            <div className="portfolio-footer__name">SABITH</div>
+        <div className="portfolio-footer__bottom-row">
+          <div className="portfolio-footer__meta">
             <div className="portfolio-footer__role">STRUCTURAL ENGINEER</div>
+            <a className="portfolio-footer__email" href={`mailto:${EMAIL}`}>
+              {EMAIL}
+            </a>
           </div>
 
-          <a className="portfolio-footer__email" href={`mailto:${EMAIL}`}>
-            {EMAIL}
-          </a>
+          <div className="portfolio-footer__brand">
+            <div className="portfolio-footer__name portfolio-footer__name--mobile">SABITH</div>
+            <div className="portfolio-footer__name portfolio-footer__name--desktop">MOHD SABITH</div>
+          </div>
         </div>
       </div>
     </footer>

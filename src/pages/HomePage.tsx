@@ -10,7 +10,7 @@ import ProjectsPage from "./ProjectsPage";
 import Footer from "../components/Footer";
 
 const ABOUT_ME_COPY =
-  "Specializing in high-rise and industrial steel structures, with strong expertise in analysis-driven design. Experienced in forensic engineering, structural retrofitting, and verification through FEA and manual hand calculations. Proven ability to deliver safe, code-compliant designs across design, BIM, and construction stages, with a clear focus on technical excellence and chartership development through IStructE.";
+  "Specializing in high-rise and industrial steel, forensic engineering, and retrofitting through FEA and manual verification. I am focused on delivering code-compliant structures while pursuing IStructE chartership. As a hobby, I apply my engineering mindset to coding, developing various software projects that translate structural logic into digital solutions across different platforms.";
 
 const MosaicReveal = ({ src }: { src: string }) => {
   const grid = 4;
@@ -211,7 +211,7 @@ export default function HomePage() {
   const projectsFrozenRef = useRef(false);
 
   const frameCount = 150;
-  const baseUrl = "https://raw.githubusercontent.com/sabism12/PORTFOLIO/main";
+  const baseUrl = "/images/hero-sequence";
 
   const topWord = "MOHAMMED";
   const bottomWord = "SABITH";
@@ -419,28 +419,11 @@ export default function HomePage() {
       aboutEl.style.setProperty("--about-opacity", opacity.toFixed(3));
     };
 
-    const setProjectsFx = (progress01: number) => {
-      const cardsEl = projectsCardsRef.current;
-      if (!cardsEl) return;
-
-      const eased = progress01 * progress01 * (3 - 2 * progress01);
-      const translateYPx = (1 - eased) * 36;
-      const scale = 0.985 + eased * 0.015;
-      const opacity = 0.68 + eased * 0.32;
-      const blurPx = (1 - eased) * 8;
-
-      cardsEl.style.setProperty("--projects-y", `${translateYPx.toFixed(1)}px`);
-      cardsEl.style.setProperty("--projects-scale", scale.toFixed(4));
-      cardsEl.style.setProperty("--projects-opacity", opacity.toFixed(3));
-      cardsEl.style.setProperty("--projects-blur", `${blurPx.toFixed(2)}px`);
-    };
-
     const update = () => {
       rafId = 0;
 
       if (!mql.matches) {
         setFx(0);
-        setProjectsFx(1);
         if (projectsFrozenRef.current) {
           projectsFrozenRef.current = false;
           setProjectsFrozen(false);
@@ -448,29 +431,24 @@ export default function HomePage() {
         return;
       }
 
-      // Keep the cards frozen once Projects reaches the top, so the footer can slide over them.
       const projectsEl = projectsOverlayRef.current;
-      if (projectsEl) {
-        const shouldFreeze = projectsEl.getBoundingClientRect().top <= 0;
-        if (shouldFreeze !== projectsFrozenRef.current) {
-          projectsFrozenRef.current = shouldFreeze;
-          setProjectsFrozen(shouldFreeze);
-        }
+      if (!projectsEl) {
+        setFx(0);
+        return;
       }
 
-      const cardsEl = projectsCardsRef.current;
-      if (!cardsEl) return;
+      const viewportHeight = window.innerHeight || 1;
+      const projectsRect = projectsEl.getBoundingClientRect();
+      const effectStart = viewportHeight * 0.92;
+      const effectRange = viewportHeight * 0.92;
+      const rawProgress = (effectStart - projectsRect.top) / effectRange;
+      const progress = Math.min(1, Math.max(0, rawProgress));
 
-      const top = cardsEl.getBoundingClientRect().top;
-      const vh = Math.max(1, window.innerHeight || 1);
-
-      // Start only when the cards overlap the viewport "center-ish" area.
-      const startY = vh * 0.82;
-      const endY = vh * 0.18;
-      const raw = (startY - top) / Math.max(1, startY - endY);
-      const progress01 = Math.min(1, Math.max(0, raw));
-      setFx(progress01);
-      setProjectsFx(progress01);
+      setFx(progress);
+      if (projectsFrozenRef.current) {
+        projectsFrozenRef.current = false;
+        setProjectsFrozen(false);
+      }
     };
 
     const onScroll = () => {
@@ -548,6 +526,62 @@ export default function HomePage() {
     observer.observe(textEl);
     return () => observer.disconnect();
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const isMobileViewport = window.matchMedia("(max-width: 767px)").matches;
+    const shouldLockIntroScroll = isMobileViewport && (isLoading || !heroReady);
+    if (!shouldLockIntroScroll) return;
+
+    const scrollY = window.scrollY;
+    const { body, documentElement } = document;
+    const previousBodyOverflow = body.style.overflow;
+    const previousBodyPosition = body.style.position;
+    const previousBodyTop = body.style.top;
+    const previousBodyWidth = body.style.width;
+    const previousBodyTouchAction = body.style.touchAction;
+    const previousHtmlOverflow = documentElement.style.overflow;
+    const previousOverscrollBehavior = documentElement.style.overscrollBehavior;
+
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    documentElement.style.overflow = "hidden";
+    documentElement.style.overscrollBehavior = "none";
+    body.style.overflow = "hidden";
+    body.style.position = "fixed";
+    body.style.top = `-${scrollY}px`;
+    body.style.width = "100%";
+    body.style.touchAction = "none";
+
+    const preventScroll = (event: Event) => {
+      event.preventDefault();
+    };
+
+    const preventScrollKeys = (event: KeyboardEvent) => {
+      const blockedKeys = ["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " ", "Spacebar"];
+      if (blockedKeys.includes(event.key)) {
+        event.preventDefault();
+      }
+    };
+
+    window.addEventListener("wheel", preventScroll, { passive: false });
+    window.addEventListener("touchmove", preventScroll, { passive: false });
+    window.addEventListener("keydown", preventScrollKeys, { passive: false });
+
+    return () => {
+      window.removeEventListener("wheel", preventScroll);
+      window.removeEventListener("touchmove", preventScroll);
+      window.removeEventListener("keydown", preventScrollKeys);
+      documentElement.style.overflow = previousHtmlOverflow;
+      documentElement.style.overscrollBehavior = previousOverscrollBehavior;
+      body.style.overflow = previousBodyOverflow;
+      body.style.position = previousBodyPosition;
+      body.style.top = previousBodyTop;
+      body.style.width = previousBodyWidth;
+      body.style.touchAction = previousBodyTouchAction;
+      window.scrollTo({ top: scrollY, left: 0, behavior: "auto" });
+    };
+  }, [heroReady, isLoading]);
 
 
   return (
@@ -692,17 +726,18 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* About Me Section */}
-        <section
-          ref={aboutStickyFxRef}
-          className="about-sticky about-sticky-fx text-black flex flex-col md:flex-row items-stretch overflow-hidden min-h-screen"
-          style={{ backgroundColor: '#f5f0e8' }}
-        >
+        <div className="about-projects-stack">
+          {/* About Me Section */}
+          <section
+            ref={aboutStickyFxRef}
+            className="about-sticky about-sticky-fx text-black flex flex-col md:flex-row items-stretch overflow-hidden min-h-screen"
+            style={{ backgroundColor: '#f5f0e8' }}
+          >
 
           {/* IMAGE — top on mobile, left on desktop */}
-          <div className="about-image w-full md:w-1/2 order-first md:order-none relative overflow-hidden flex items-center justify-center bg-[#f5f0e8]">
+          <div className="about-image w-full md:w-1/2 order-first md:order-none relative overflow-hidden flex items-center justify-center md:justify-start bg-[#f5f0e8]">
             <div className="about-image-media w-full aspect-square md:w-auto md:h-screen md:max-h-screen md:aspect-square flex items-center justify-center">
-              <MosaicReveal src="https://raw.githubusercontent.com/sabism12/PORTFOLIO/main/portrait/Whisk_6686b85e16b3fb0a6754b85d88a96a5ceg.png" />
+              <MosaicReveal src="/images/portrait.png" />
             </div>
             {/* Desktop sidebar badge */}
             <div className="absolute right-0 top-1/2 -translate-y-1/2 hidden md:flex bg-black text-white px-4 py-8 flex-col items-center gap-4 rounded-sm shadow-2xl z-10">
@@ -713,16 +748,16 @@ export default function HomePage() {
           </div>
 
           {/* TEXT — below image on mobile, right on desktop */}
-          <div className="about-text w-full md:w-1/2 flex flex-col justify-center px-6 py-10 md:p-24 overflow-hidden" style={{ backgroundColor: '#f5f0e8' }}>
+          <div className="about-text w-full md:w-1/2 flex flex-col justify-center px-6 py-10 md:px-16 md:py-14 lg:px-20 lg:py-16 xl:px-24 overflow-hidden" style={{ backgroundColor: '#f5f0e8' }}>
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="flex flex-col items-start w-full h-full"
+              className="about-copy-shell flex flex-col items-start w-full h-full md:max-w-[38rem] md:mx-auto md:justify-center md:gap-8"
             >
               {/* Label */}
-              <div className="flex items-center gap-3 mb-4 md:mb-6">
+              <div className="about-section-label flex items-center gap-3 mb-4 md:mb-0">
                 <div className="w-6 md:w-10 h-[2px]" style={{ backgroundColor: '#e85d1a' }} />
                 <span className="text-[10px] md:text-xs tracking-[0.4em] uppercase font-bold" style={{ color: '#e85d1a', opacity: 0.7 }}>
                   Portfolio / 2026
@@ -731,7 +766,7 @@ export default function HomePage() {
 
               {/* Main heading — orange, bold, impact-style like screenshot */}
               <h2
-                className="font-black uppercase leading-[0.9] mb-4 md:mb-10"
+                className="about-heading font-black uppercase leading-[0.9] mb-4 md:mb-0"
                 style={{
                   fontFamily: 'Impact, "Arial Black", sans-serif',
                   fontSize: 'clamp(2.4rem, 8vw, 5rem)',
@@ -746,7 +781,7 @@ export default function HomePage() {
               <div className="about-body w-full">
                 <p
                   ref={aboutMeTextRef}
-                  className="about-me-text mb-4 md:mb-10 font-sans tracking-wide"
+                  className="about-me-text mb-4 md:mb-0 font-sans tracking-wide"
                   style={{ 
                     color: '#e85d1a', 
                     fontSize: 'clamp(1rem, 2.5vw, 1.4rem)', 
@@ -765,7 +800,7 @@ export default function HomePage() {
               </div>
 
               {/* CTA */}
-              <div className="about-cta flex gap-4 mt-2">
+              <div className="about-cta flex gap-4 mt-2 md:mt-0">
                 <a
                   href="https://drive.google.com/file/d/1nXl56qr49xzO45P3B3MRWhPoZAlYczge/view?usp=sharing"
                   target="_blank"
@@ -791,19 +826,28 @@ export default function HomePage() {
               </div>
             </motion.div>
           </div>
-        </section>
+          </section>
 
-        {/* Projects Page (after About) */}
-        <section
-          ref={projectsOverlayRef}
-          id="projects"
-          className={`projects-overlay relative z-10 ${projectsFrozen ? "is-frozen" : ""}`}
-        >
-          <div className="projects-scroll-buffer" aria-hidden="true" />
-          <div ref={projectsCardsRef} className="projects-overlay-inner">
-            <ProjectsPage enableGlobalWheel={false} embedded={isMobile} />
-          </div>
-        </section>
+          <div className="about-desktop-buffer hidden md:block" aria-hidden="true" />
+
+          {/* Projects Page (after About) */}
+          {isMobile ? (
+            <section
+              ref={projectsOverlayRef}
+              id="projects"
+              className={`projects-overlay relative z-10 ${projectsFrozen ? "is-frozen" : ""}`}
+            >
+              <div className="projects-scroll-buffer" aria-hidden="true" />
+              <div ref={projectsCardsRef} className="projects-overlay-inner">
+                <ProjectsPage enableGlobalWheel={false} embedded />
+              </div>
+            </section>
+          ) : (
+            <section id="projects" className="relative z-10 bg-[#050607]">
+              <ProjectsPage enableGlobalWheel embedded />
+            </section>
+          )}
+        </div>
 
         {/* Footer */}
         <Footer />
