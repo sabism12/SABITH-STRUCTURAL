@@ -61,26 +61,22 @@ const MosaicReveal = ({ src }: { src: string }) => {
         };
 
         return (
-          // Mobile: pure CSS block with --index for stagger delay
-          // Desktop: framer-motion random-order reveal (hidden on mobile via md: class)
-          <>
+          <div key={`mosaic-block-${i}`}>
             {/* Mobile block */}
             <div
-              key={`m-${i}`}
               className="mosaic-block md:hidden w-full h-full"
               style={{ ...bgStyle, ['--index' as string]: i }}
             />
             {/* Desktop block */}
             <motion.div
-              key={`d-${i}`}
               initial={{ opacity: 0, scale: 0.8 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              transition={{ delay: indices.indexOf(i) * 0.05, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ delay: (indices.length > 0 ? indices.indexOf(i) : i) * 0.05, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
               style={bgStyle}
               className="hidden md:block w-full h-full"
             />
-          </>
+          </div>
         );
       })}
     </div>
@@ -90,7 +86,16 @@ const MosaicReveal = ({ src }: { src: string }) => {
 const LoadingScreen = ({ onComplete }: { onComplete: () => void }) => {
   const [progress, setProgress] = useState(0);
   const [wordIndex, setWordIndex] = useState(0);
-  const words = ["Design", "Create", "Inspire"];
+  const words = [
+    "Checking model for errors...",
+    "Creating analysis model...",
+    "Assembling global stiffness matrix...",
+    "Solving equations...",
+    "Computing member forces...",
+    "Calculating story drifts...",
+    "Model fully optimized.",
+    "Deploying portfolio..."
+  ];
   const onCompleteRef = useRef(onComplete);
 
   useEffect(() => {
@@ -104,7 +109,7 @@ const LoadingScreen = ({ onComplete }: { onComplete: () => void }) => {
     const animate = (time: number) => {
       if (!startTime) startTime = time;
       const elapsed = time - startTime;
-      const nextProgress = Math.min(100, (elapsed / 2700) * 100);
+      const nextProgress = Math.min(100, (elapsed / 3400) * 100);
       setProgress(nextProgress);
 
       if (nextProgress < 100) {
@@ -112,7 +117,7 @@ const LoadingScreen = ({ onComplete }: { onComplete: () => void }) => {
       } else {
         setTimeout(() => {
           onCompleteRef.current();
-        }, 400);
+        }, 500);
       }
     };
 
@@ -127,38 +132,40 @@ const LoadingScreen = ({ onComplete }: { onComplete: () => void }) => {
         clearInterval(interval);
         return prev;
       });
-    }, 900);
+    }, 425);
     return () => clearInterval(interval);
   }, []);
 
   return (
     <motion.div
-      className="fixed inset-0 z-[9999] bg-bg"
+      className="fixed inset-0 z-[9999] bg-bg font-mono"
       exit={{ opacity: 0 }}
       transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
     >
-      <motion.div
-        className="absolute top-8 left-8 md:top-12 md:left-12 text-xs md:text-sm text-muted uppercase tracking-[0.3em]"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.1 }}
-      >
-        Portfolio
-      </motion.div>
+      <div className="absolute top-8 left-8 md:top-12 md:left-12 flex flex-col items-start justify-start text-left w-full pr-8">
+        <motion.div
+          className="text-[10px] md:text-sm text-muted uppercase tracking-[0.3em] mb-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+        >
+          Portfolio
+        </motion.div>
 
-      <div className="absolute inset-0 flex items-center justify-center">
-        <AnimatePresence mode="wait">
-          <motion.span
-            key={wordIndex}
-            className="text-4xl md:text-6xl lg:text-7xl font-display italic text-text/80"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-          >
-            {words[wordIndex]}
-          </motion.span>
-        </AnimatePresence>
+        <div className="flex flex-col items-start gap-1 md:gap-2 mb-6">
+          {words.slice(0, wordIndex + 1).map((word, idx) => (
+            <motion.div
+              key={idx}
+              className={`text-[11px] md:text-lg lg:text-xl font-mono whitespace-nowrap ${word === "Deploying portfolio..." ? "text-green-500 font-bold" : "text-text/90"}`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+            >
+              {">"} {word}
+            </motion.div>
+          ))}
+        </div>
+
       </div>
 
       <motion.div
@@ -174,8 +181,8 @@ const LoadingScreen = ({ onComplete }: { onComplete: () => void }) => {
         <motion.div
           className="h-full origin-left"
           style={{
-            background: "linear-gradient(90deg, #89AACC 0%, #4E85BF 100%)",
-            boxShadow: "0 0 8px rgba(137, 170, 204, 0.35)",
+            background: "linear-gradient(90deg, #e85d1a 0%, #ff9054 100%)",
+            boxShadow: "0 0 8px rgba(232, 93, 26, 0.4)",
           }}
           initial={{ scaleX: 0 }}
           animate={{ scaleX: progress / 100 }}
@@ -734,98 +741,99 @@ export default function HomePage() {
             style={{ backgroundColor: '#f5f0e8' }}
           >
 
-          {/* IMAGE — top on mobile, left on desktop */}
-          <div className="about-image w-full md:w-1/2 order-first md:order-none relative overflow-hidden flex items-center justify-center md:justify-start bg-[#f5f0e8]">
-            <div className="about-image-media w-full aspect-square md:w-auto md:h-screen md:max-h-screen md:aspect-square flex items-center justify-center">
-              <MosaicReveal src="/images/portrait.png" />
-            </div>
-            {/* Desktop sidebar badge */}
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 hidden md:flex bg-black text-white px-4 py-8 flex-col items-center gap-4 rounded-sm shadow-2xl z-10">
-              <span className="font-bold text-2xl">S.</span>
-              <div className="h-24 w-[1px] bg-white/20" />
-              <span className="[writing-mode:vertical-rl] font-bold tracking-widest uppercase text-[12px] py-4">Engineer</span>
-            </div>
-          </div>
-
-          {/* TEXT — below image on mobile, right on desktop */}
-          <div className="about-text w-full md:w-1/2 flex flex-col justify-center px-6 py-10 md:px-16 md:py-14 lg:px-20 lg:py-16 xl:px-24 overflow-hidden" style={{ backgroundColor: '#f5f0e8' }}>
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="about-copy-shell flex flex-col items-start w-full h-full md:max-w-[38rem] md:mx-auto md:justify-center md:gap-8"
-            >
-              {/* Label */}
-              <div className="about-section-label flex items-center gap-3 mb-4 md:mb-0">
-                <div className="w-6 md:w-10 h-[2px]" style={{ backgroundColor: '#e85d1a' }} />
-                <span className="text-[10px] md:text-xs tracking-[0.4em] uppercase font-bold" style={{ color: '#e85d1a', opacity: 0.7 }}>
-                  Portfolio / 2026
-                </span>
+            {/* IMAGE — top on mobile, left on desktop */}
+            <div className="about-image w-full md:w-1/2 order-first md:order-none relative overflow-hidden flex items-center justify-center md:justify-start bg-[#f5f0e8]">
+              <div className="about-image-media w-full aspect-square md:w-auto md:h-screen md:max-h-screen md:aspect-square flex items-center justify-center">
+                <MosaicReveal src="/images/portrait.png" />
               </div>
+              {/* Desktop sidebar badge */}
+              <div className="absolute right-0 top-1/2 -translate-y-1/2 hidden md:flex bg-black text-white px-4 py-8 flex-col items-center gap-4 rounded-sm shadow-2xl z-10">
+                <span className="font-bold text-2xl">S.</span>
+                <div className="h-24 w-[1px] bg-white/20" />
+                <span className="[writing-mode:vertical-rl] font-bold tracking-widest uppercase text-[12px] py-4">Engineer</span>
+              </div>
+            </div>
 
-              {/* Main heading — orange, bold, impact-style like screenshot */}
-              <h2
-                className="about-heading font-black uppercase leading-[0.9] mb-4 md:mb-0"
-                style={{
-                  fontFamily: 'Impact, "Arial Black", sans-serif',
-                  fontSize: 'clamp(2.4rem, 8vw, 5rem)',
-                  color: '#e85d1a',
-                  letterSpacing: '-0.01em',
-                }}
+            {/* TEXT — below image on mobile, right on desktop */}
+            <div className="about-text w-full md:w-1/2 flex flex-col justify-center px-6 py-10 md:px-16 md:py-14 lg:px-20 lg:py-16 xl:px-24 overflow-hidden" style={{ backgroundColor: '#f5f0e8' }}>
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="about-copy-shell flex flex-col items-start w-full h-full md:max-w-[38rem] md:mx-auto md:justify-center md:gap-8"
               >
-                STRUCTURAL<br />ENGINEER
-              </h2>
+                {/* Label */}
+                <div className="about-section-label flex items-center gap-3 mb-4 md:mb-0">
+                  <div className="w-6 md:w-10 h-[2px]" style={{ backgroundColor: '#e85d1a' }} />
+                  <span className="text-[10px] md:text-xs tracking-[0.4em] uppercase font-bold" style={{ color: '#e85d1a', opacity: 0.7 }}>
+                    Portfolio / 2026
+                  </span>
+                </div>
 
-              {/* Body copy */}
-              <div className="about-body w-full">
-                <p
-                  ref={aboutMeTextRef}
-                  className="about-me-text mb-4 md:mb-0 font-sans tracking-wide"
-                  style={{ 
-                    color: '#e85d1a', 
-                    fontSize: 'clamp(1rem, 2.5vw, 1.4rem)', 
-                    lineHeight: '1.4',
-                    maxWidth: '45ch',
-                    fontWeight: 400
-                  }}
-                >
-                  {ABOUT_ME_COPY.split(" ").map((word, index, arr) => (
-                    <span key={`${word}-${index}`}>
-                      <span className="about-word">{word}</span>
-                      {index < arr.length - 1 ? " " : ""}
-                    </span>
-                  ))}
-                </p>
-              </div>
-
-              {/* CTA */}
-              <div className="about-cta flex gap-4 mt-2 md:mt-0">
-                <a
-                  href="https://drive.google.com/file/d/1nXl56qr49xzO45P3B3MRWhPoZAlYczge/view?usp=sharing"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-5 py-2.5 md:px-7 md:py-3 text-[9px] md:text-[11px] font-bold tracking-widest uppercase cursor-pointer transition-all duration-300"
+                {/* Main heading — orange, bold, impact-style like screenshot */}
+                <h2
+                  className="about-heading font-black uppercase leading-[0.9] mb-4 md:mb-0"
                   style={{
-                    border: '2px solid #e85d1a',
+                    fontFamily: 'Impact, "Arial Black", sans-serif',
+                    fontSize: 'clamp(2.4rem, 8vw, 5rem)',
                     color: '#e85d1a',
-                    borderRadius: '999px',
-                    textDecoration: 'none'
-                  }}
-                  onMouseEnter={e => {
-                    (e.currentTarget as HTMLAnchorElement).style.backgroundColor = '#e85d1a';
-                    (e.currentTarget as HTMLAnchorElement).style.color = '#fff';
-                  }}
-                  onMouseLeave={e => {
-                    (e.currentTarget as HTMLAnchorElement).style.backgroundColor = 'transparent';
-                    (e.currentTarget as HTMLAnchorElement).style.color = '#e85d1a';
+                    letterSpacing: '-0.01em',
                   }}
                 >
-                  Download CV
-                </a>
-              </div>
-            </motion.div>
-          </div>
+                  STRUCTURAL<br />ENGINEER
+                </h2>
+
+                {/* Body copy */}
+                <div className="about-body w-full">
+                  <p
+                    ref={aboutMeTextRef}
+                    className="about-me-text mb-4 md:mb-0"
+                    style={{
+                      color: '#e85d1a',
+                      fontSize: 'clamp(1rem, 2.5vw, 1.4rem)',
+                      lineHeight: '1.4',
+                      maxWidth: '45ch',
+                      fontWeight: 400,
+                      fontFamily: '"Outfit", sans-serif'
+                    }}
+                  >
+                    {ABOUT_ME_COPY.split(" ").map((word, index, arr) => (
+                      <span key={`${word}-${index}`}>
+                        <span className="about-word">{word}</span>
+                        {index < arr.length - 1 ? " " : ""}
+                      </span>
+                    ))}
+                  </p>
+                </div>
+
+                {/* CTA */}
+                <div className="about-cta flex gap-4 mt-2 md:mt-0">
+                  <a
+                    href="https://drive.google.com/file/d/1nXl56qr49xzO45P3B3MRWhPoZAlYczge/view?usp=sharing"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-5 py-2.5 md:px-7 md:py-3 text-[9px] md:text-[11px] font-bold tracking-widest uppercase cursor-pointer transition-all duration-300"
+                    style={{
+                      border: '2px solid #e85d1a',
+                      color: '#e85d1a',
+                      borderRadius: '999px',
+                      textDecoration: 'none'
+                    }}
+                    onMouseEnter={e => {
+                      (e.currentTarget as HTMLAnchorElement).style.backgroundColor = '#e85d1a';
+                      (e.currentTarget as HTMLAnchorElement).style.color = '#fff';
+                    }}
+                    onMouseLeave={e => {
+                      (e.currentTarget as HTMLAnchorElement).style.backgroundColor = 'transparent';
+                      (e.currentTarget as HTMLAnchorElement).style.color = '#e85d1a';
+                    }}
+                  >
+                    Download CV
+                  </a>
+                </div>
+              </motion.div>
+            </div>
           </section>
 
           <div className="about-desktop-buffer hidden md:block" aria-hidden="true" />

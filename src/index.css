@@ -1,10 +1,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Anton&family=Instrument+Serif:ital@0;1&family=Michroma&family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@400;600;900&family=JetBrains+Mono:wght@400;700&display=swap');
 @import "tailwindcss";
 
+@font-face {
+  font-family: 'MartianGrotesk';
+  src: url('/text/MartianGrotesk-CnUlt.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
   --font-display: "Instrument Serif", "Michroma", serif;
   --font-sans: "Space Grotesk", "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-martian: "MartianGrotesk", sans-serif;
   
   --color-bg: #0a0a0a;
   --color-text: #f5f5f5;
@@ -135,7 +144,6 @@
   }
 
   .projects-overlay {
-    position: relative;
     z-index: 10;
     background: transparent; /* cards-only overlay; About acts as background */
     border: 0 !important;
@@ -173,6 +181,7 @@
 
   .projects-scroll-buffer {
     height: 100vh;
+    pointer-events: none;
   }
 
   .projects-mobile-shell,
@@ -199,6 +208,7 @@
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
     background: #000 !important;
+    font-family: "Outfit", sans-serif;
   }
 
   body.projects-detail-open .projects-overlay {
@@ -209,6 +219,10 @@
     z-index: 10001 !important;
   }
 
+  body.projects-detail-open .scroll-build-indicator {
+    display: none !important;
+  }
+
   .projects-mobile-shell {
     width: 100%;
     min-height: auto;
@@ -216,6 +230,7 @@
     padding-top: clamp(18px, 4vh, 32px) !important;
     padding-bottom: clamp(20px, 4vh, 36px) !important;
     overflow: visible !important;
+    font-family: "Outfit", sans-serif;
   }
 
   .project-card-glass {
@@ -590,4 +605,8 @@
     transform: translateY(30px);
     will-change: transform, opacity;
   }
+}
+
+body.projects-detail-open .scroll-build-indicator {
+  display: none !important;
 }
