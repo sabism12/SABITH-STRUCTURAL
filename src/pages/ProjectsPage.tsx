@@ -286,7 +286,7 @@ export default function ProjectsPage({ enableGlobalWheel = true, embedded = fals
       tags: ["ETABS | SAFE", "EXCEL", "AUTOCAD"],
       industry: "Commercial",
       client: "Steel Jacketing & Section Enlargement",
-      heroImage: "/images/slab retrofitting.png",
+      heroImage: "/images/slab retrofitting.webp",
       imageName: "slab_retrofitting.png",
       analysisImages: [
         "https://lh3.googleusercontent.com/d/1aJHOf088jpFOHfqQJSGN1AfJom8z3ZWV",
@@ -315,13 +315,13 @@ export default function ProjectsPage({ enableGlobalWheel = true, embedded = fals
       heroImage: "https://lh3.googleusercontent.com/d/1YdBJUZzSrTtEZLDaN0RMw5WgM2jBKvaM",
       imageName: "3d.png",
       analysisImages: [
-        "/images/model.png"
+        "/images/model.webp"
       ],
       slabImages: [
-        "/images/slab.png"
+        "/images/slab.webp"
       ],
       foundationImages: [
-        "/images/piles.png"
+        "/images/piles.webp"
       ],
       analysisDescription: "The villa's complex geometry, including large cantilevers, required rigorous finite element analysis to ensure deflection control and structural safety.",
       slabTitle: "Slab Design",

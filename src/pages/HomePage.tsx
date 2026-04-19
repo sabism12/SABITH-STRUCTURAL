@@ -233,6 +233,7 @@ export default function HomePage() {
   const [failedImages, setFailedImages] = useState<string[]>([]);
   const [assetLoadProgress, setAssetLoadProgress] = useState(0);
   const [pageFullyLoaded, setPageFullyLoaded] = useState(false);
+  const [priorityLoaded, setPriorityLoaded] = useState(false);
 
   // GSAP refs — mobile only
   const mobileNameRef = useRef<HTMLDivElement>(null);
@@ -263,12 +264,18 @@ export default function HomePage() {
         const frameIndex = i.toString().padStart(3, '0');
         const img = new Image();
         img.crossOrigin = "anonymous";
-        img.src = `${baseUrl}/ezgif-frame-${frameIndex}.png`;
+        img.src = `${baseUrl}/ezgif-frame-${frameIndex}.webp`;
 
         img.onload = () => {
           loadedImages[i - 1] = img;
           loadedCount++;
           setAssetLoadProgress(Math.floor((loadedCount / frameCount) * 100));
+          
+          // Mark priority as loaded if first 15 frames are ready
+          if (loadedCount >= 15) {
+            setPriorityLoaded(true);
+          }
+          
           checkComplete();
         };
 
@@ -640,7 +647,7 @@ export default function HomePage() {
           <LoadingScreen 
             onComplete={() => setIsLoading(false)} 
             actualProgress={assetLoadProgress}
-            isReady={pageFullyLoaded}
+            isReady={pageFullyLoaded && priorityLoaded}
           />
         )}
       </AnimatePresence>
@@ -790,7 +797,7 @@ export default function HomePage() {
             {/* IMAGE — top on mobile, left on desktop */}
             <div className="about-image w-full md:w-1/2 order-first md:order-none relative overflow-hidden flex items-center justify-center md:justify-start bg-[#f5f0e8]">
               <div className="about-image-media w-full aspect-square md:w-auto md:h-screen md:max-h-screen md:aspect-square flex items-center justify-center">
-                <MosaicReveal src="/images/portrait.png" />
+                <MosaicReveal src="/images/portrait.webp" />
               </div>
               {/* Desktop sidebar badge */}
               <div className="absolute right-0 top-1/2 -translate-y-1/2 hidden md:flex bg-black text-white px-4 py-8 flex-col items-center gap-4 rounded-sm shadow-2xl z-10">
