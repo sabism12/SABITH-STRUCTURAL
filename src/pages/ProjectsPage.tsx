@@ -235,17 +235,17 @@ export default function ProjectsPage({ enableGlobalWheel = true, embedded = fals
       tags: ["ETABS | SAFE", "EXCEL | SAP 2000", "AutoCad | Revit"],
       industry: "Commercial Real Estate",
       client: "RC Frame with Shear Walls",
-      heroImage: "https://lh3.googleusercontent.com/d/1q4rJ__ySenApJj0zcbEiw66fzemxIRmw",
+      heroImage: "/images/projects/buildings_hero.webp",
       imageName: "1775285005030.png",
       analysisImages: [
-        "https://lh3.googleusercontent.com/d/1Kxjq5HfS3gnQ6b09cP1rRXo-EkWgtBFf",
-        "https://lh3.googleusercontent.com/d/1Kq70vywpkjgRZoM3njsVFn4XId4BVQND"
+        "/images/projects/buildings_analysis_1.webp",
+        "/images/projects/buildings_analysis_2.webp"
       ],
       slabImages: [
-        "https://lh3.googleusercontent.com/d/198G4mieNFsH1ebkuH1Xcpg1VupMw14Ay"
+        "/images/projects/buildings_slab.webp"
       ],
       foundationImages: [
-        "https://lh3.googleusercontent.com/d/1O4pID4uOv2ndFNxNoPMfo80JVuwntyLC"
+        "/images/projects/buildings_foundation.webp"
       ],
       analysisDescription: "The superstructure was modeled and analyzed using ETABS. We performed dynamic analysis to ensure resilience against both seismic and wind loads, focusing on shear wall placement.",
       slabTitle: "Slab Design",
@@ -260,18 +260,18 @@ export default function ProjectsPage({ enableGlobalWheel = true, embedded = fals
       tags: ["Staad.Pro | Prokon", "IdeaStatiCa | Excel", "AutoCad"],
       industry: "Logistics & Warehousing",
       client: "Structural Steel Truss & Columns",
-      heroImage: "https://lh3.googleusercontent.com/d/1FgeymNs7v2rjQqHqka3zTWyiK_dFUQLK",
+      heroImage: "/images/projects/warehouse_hero.webp",
       imageName: "3DRENDER.png",
       analysisImages: [
-        "https://lh3.googleusercontent.com/d/1jgRxKEV5vgbnxbDmwmzZQ8bAlRbd4j-B",
-        "https://lh3.googleusercontent.com/d/1evXoYiqY_thn2xqmUg4sErjN2qVDMn_h"
+        "/images/projects/warehouse_analysis_1.webp",
+        "/images/projects/warehouse_analysis_2.webp"
       ],
       slabImages: [
-        "https://lh3.googleusercontent.com/d/1Icc1nxedhgH8fYCzmAr-LlhIaPW8Cjas",
-        "https://lh3.googleusercontent.com/d/1kwovWRV3tCYCrbrXw-DmerAblwKLgG-D"
+        "/images/projects/warehouse_slab_1.webp",
+        "/images/projects/warehouse_slab_2.webp"
       ],
       foundationImages: [
-        "https://lh3.googleusercontent.com/d/1aJRkYYbcJU_sSaYnYM5FXtIV1T8-AgBa"
+        "/images/projects/warehouse_foundation.webp"
       ],
       analysisDescription: "The warehouse structure was modeled and analyzed using Staad.Pro for heavy industrial loads and wind pressures. Long-span trusses were optimized for material efficiency and structural stability.",
       slabTitle: "Connection Design",
@@ -289,14 +289,14 @@ export default function ProjectsPage({ enableGlobalWheel = true, embedded = fals
       heroImage: "/images/slab retrofitting.webp",
       imageName: "slab_retrofitting.png",
       analysisImages: [
-        "https://lh3.googleusercontent.com/d/1aJHOf088jpFOHfqQJSGN1AfJom8z3ZWV",
-        "https://lh3.googleusercontent.com/d/1snEJ4XfhrEy1p9PGBj08kcI-AvoBNU6D"
+        "/images/projects/retrofitting_analysis_1.webp",
+        "/images/projects/retrofitting_analysis_2.webp"
       ],
       slabImages: [
-        "https://lh3.googleusercontent.com/d/1mnIhdgfSw2nRG0Yt1l6pxMhkcGpxOH78"
+        "/images/projects/retrofitting_slab.webp"
       ],
       foundationImages: [
-        "https://lh3.googleusercontent.com/d/1iKYM1D3PJ-xbk13KM6a8Ya6LKWOeR1kQ"
+        "/images/projects/retrofitting_foundation.webp"
       ],
       analysisDescription: "The existing structure was modeled and analyzed using ETABS to identify critical stress points under seismic loading. Retrofitting strategies were then simulated to verify the improved performance.",
       slabTitle: "Slab Design",
@@ -312,7 +312,7 @@ export default function ProjectsPage({ enableGlobalWheel = true, embedded = fals
       tags: ["SAFE | ETABS", "PROKON | EXCEL", "AUTOCAD | REVIT"],
       industry: "Residential Architecture",
       client: "RC Framed Structure",
-      heroImage: "https://lh3.googleusercontent.com/d/1YdBJUZzSrTtEZLDaN0RMw5WgM2jBKvaM",
+      heroImage: "/images/projects/residential_hero.webp",
       imageName: "3d.png",
       analysisImages: [
         "/images/model.webp"
