@@ -83,7 +83,15 @@ const MosaicReveal = ({ src }: { src: string }) => {
   );
 };
 
-const LoadingScreen = ({ onComplete }: { onComplete: () => void }) => {
+const LoadingScreen = ({ 
+  onComplete, 
+  actualProgress, 
+  isReady 
+}: { 
+  onComplete: () => void,
+  actualProgress: number,
+  isReady: boolean
+}) => {
   const [progress, setProgress] = useState(0);
   const [wordIndex, setWordIndex] = useState(0);
   const words = [
@@ -97,10 +105,20 @@ const LoadingScreen = ({ onComplete }: { onComplete: () => void }) => {
     "Deploying portfolio..."
   ];
   const onCompleteRef = useRef(onComplete);
+  const actualProgressRef = useRef(actualProgress);
+  const isReadyRef = useRef(isReady);
 
   useEffect(() => {
     onCompleteRef.current = onComplete;
   }, [onComplete]);
+
+  useEffect(() => {
+    actualProgressRef.current = actualProgress;
+  }, [actualProgress]);
+
+  useEffect(() => {
+    isReadyRef.current = isReady;
+  }, [isReady]);
 
   useEffect(() => {
     let startTime: number | null = null;
@@ -109,15 +127,26 @@ const LoadingScreen = ({ onComplete }: { onComplete: () => void }) => {
     const animate = (time: number) => {
       if (!startTime) startTime = time;
       const elapsed = time - startTime;
-      const nextProgress = Math.min(100, (elapsed / 3400) * 100);
-      setProgress(nextProgress);
-
-      if (nextProgress < 100) {
-        animationFrame = requestAnimationFrame(animate);
-      } else {
+      
+      const isTimedOut = elapsed >= 12000; // 12-second safety timeout
+      
+      // Visual progress based on time (min 3.4s)
+      const visualProgress = Math.min(99, (elapsed / 3400) * 100);
+      
+      // If everything is ready (or timed out), we can jump to 100%
+      // Allow completion if at least 90% of assets are loaded and page is ready, or if timed out
+      const assetsMostlyReady = actualProgressRef.current >= 90;
+      if ((isReadyRef.current && assetsMostlyReady && elapsed >= 3400) || isTimedOut) {
+        setProgress(100);
         setTimeout(() => {
           onCompleteRef.current();
-        }, 500);
+        }, 600);
+      } else {
+        // Otherwise, show the minimum of visual progress vs actual progress (capped at 99)
+        // This ensures the bar reflect REAL loading if it takes a long time.
+        const effectiveProgress = Math.min(visualProgress, Math.max(1, actualProgressRef.current));
+        setProgress(effectiveProgress);
+        animationFrame = requestAnimationFrame(animate);
       }
     };
 
@@ -202,6 +231,8 @@ export default function HomePage() {
   const [bgColor, setBgColor] = useState("#3d2b1f");
   const [currentFrame, setCurrentFrame] = useState(0);
   const [failedImages, setFailedImages] = useState<string[]>([]);
+  const [assetLoadProgress, setAssetLoadProgress] = useState(0);
+  const [pageFullyLoaded, setPageFullyLoaded] = useState(false);
 
   // GSAP refs — mobile only
   const mobileNameRef = useRef<HTMLDivElement>(null);
@@ -237,6 +268,7 @@ export default function HomePage() {
         img.onload = () => {
           loadedImages[i - 1] = img;
           loadedCount++;
+          setAssetLoadProgress(Math.floor((loadedCount / frameCount) * 100));
           checkComplete();
         };
 
@@ -244,6 +276,7 @@ export default function HomePage() {
           console.warn(`Frame ${frameIndex} missing at ${img.src}`);
           setFailedImages(prev => [...prev, frameIndex]);
           loadedCount++;
+          setAssetLoadProgress(Math.floor((loadedCount / frameCount) * 100));
           checkComplete();
         };
 
@@ -256,6 +289,15 @@ export default function HomePage() {
     };
 
     preloadImages();
+
+    // Check if page is already loaded or wait for it
+    if (document.readyState === "complete") {
+      setPageFullyLoaded(true);
+    } else {
+      const handleLoad = () => setPageFullyLoaded(true);
+      window.addEventListener("load", handleLoad);
+      return () => window.removeEventListener("load", handleLoad);
+    }
   }, []);
 
   useEffect(() => {
@@ -595,7 +637,11 @@ export default function HomePage() {
     <div className="relative w-full" style={{ backgroundColor: bgColor }}>
       <AnimatePresence mode="wait">
         {isLoading && (
-          <LoadingScreen onComplete={() => setIsLoading(false)} />
+          <LoadingScreen 
+            onComplete={() => setIsLoading(false)} 
+            actualProgress={assetLoadProgress}
+            isReady={pageFullyLoaded}
+          />
         )}
       </AnimatePresence>
 
