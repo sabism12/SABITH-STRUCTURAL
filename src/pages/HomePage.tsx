@@ -10,7 +10,7 @@ import ProjectsPage from "./ProjectsPage";
 import Footer from "../components/Footer";
 
 const ABOUT_ME_COPY =
-  "Specializing in high-rise and industrial steel, forensic engineering, and retrofitting through FEA and manual verification. I am focused on delivering code-compliant structures while pursuing IStructE chartership. As a hobby, I apply my engineering mindset to coding, developing various software projects that translate structural logic into digital solutions across different platforms.";
+  "Specializing in high-rise and industrial steel, forensic engineering, and retrofitting through FEA and manual verification. I am focused on delivering code-compliant structures while pursuing IStructE chartership. Beyond structural analysis, I build custom engineering tools and automation scripts to streamline complex design workflows.";
 
 const MosaicReveal = ({ src }: { src: string }) => {
   const grid = 4;
