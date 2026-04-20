@@ -566,8 +566,8 @@ export default function HomePage() {
           targets: words,
           translateY: [30, 0],
           opacity: [0, 1],
-          delay: anime.stagger(80),
-          duration: 950,
+          delay: anime.stagger(40),
+          duration: 750,
           easing: "easeOutExpo",
         });
 
@@ -761,7 +761,7 @@ export default function HomePage() {
                           variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } } }}
                           className="w-full flex flex-col items-start"
                         >
-                          <div className="text-white/70 max-w-xl font-sans text-base leading-relaxed text-left">
+                          <div className="text-white/70 max-w-xl font-sans text-base leading-relaxed text-left" style={{ textAlign: 'justify' }}>
                             Strength in design, precision in execution. I transform complex engineering challenges into safe, efficient, and buildable realities.
                           </div>
                           <div className="flex gap-4 mt-12">
@@ -848,7 +848,8 @@ export default function HomePage() {
                       lineHeight: '1.4',
                       maxWidth: '45ch',
                       fontWeight: 400,
-                      fontFamily: '"Outfit", sans-serif'
+                      fontFamily: '"Outfit", sans-serif',
+                      textAlign: 'justify'
                     }}
                   >
                     {ABOUT_ME_COPY.split(" ").map((word, index, arr) => (

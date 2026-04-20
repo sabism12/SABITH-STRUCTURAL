@@ -787,7 +787,7 @@ export default function ProjectsPage({ enableGlobalWheel = true, embedded = fals
                             <h3 className="text-xs font-bold text-white/40 uppercase tracking-wider">Overview</h3>
                           </div>
                           <div className="col-span-8">
-                            <p className="text-xs leading-snug text-white/80 line-clamp-3">{project.overview}</p>
+                            <p className="text-xs leading-snug text-white/80 line-clamp-3" style={{ textAlign: 'justify' }}>{project.overview}</p>
                           </div>
                         </div>
 
