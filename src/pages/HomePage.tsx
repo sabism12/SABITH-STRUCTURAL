@@ -863,7 +863,8 @@ export default function HomePage() {
                 {/* CTA */}
                 <div className="about-cta flex gap-4 mt-2 md:mt-0">
                   <a
-                    href="https://drive.google.com/file/d/1nXl56qr49xzO45P3B3MRWhPoZAlYczge/view?usp=sharing"
+                    href="/Mohammed Sabith CV.pdf"
+                    download="Mohammed Sabith CV.pdf"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="px-5 py-2.5 md:px-7 md:py-3 text-[9px] md:text-[11px] font-bold tracking-widest uppercase cursor-pointer transition-all duration-300"
