@@ -91,7 +91,7 @@
   }
 
   .about-body {
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     min-height: 0;
     width: 100%;
     overflow: hidden; /* no scrolling inside About on short phones */
@@ -150,6 +150,7 @@
     box-shadow: none !important;
     height: auto;
     overflow: visible !important;
+    pointer-events: none;
   }
 
   .projects-overlay-inner {
@@ -167,6 +168,7 @@
     opacity: 1;
     filter: none;
     will-change: auto;
+    pointer-events: auto;
   }
 
   /* After Projects reaches the top, keep cards frozen so the footer can slide over them. */

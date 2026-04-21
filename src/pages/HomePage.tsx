@@ -862,30 +862,31 @@ export default function HomePage() {
                 </div>
 
                 {/* CTA */}
-                <div className="about-cta flex gap-4 mt-2 md:mt-0">
+                <div className="about-cta flex items-center justify-between w-full mt-2 md:mt-0">
                   <a
                     href="/Mohammed Sabith CV.pdf"
                     download="Mohammed Sabith CV.pdf"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-5 py-2.5 md:px-7 md:py-3 text-[9px] md:text-[11px] font-bold tracking-widest uppercase cursor-pointer transition-all duration-300"
+                    className="px-5 py-2.5 md:px-7 md:py-3 text-[9px] md:text-[11px] font-bold tracking-widest uppercase cursor-pointer transition-all duration-300 border-2 border-[#e85d1a] text-[#e85d1a] rounded-full md:hover:bg-[#e85d1a] md:hover:text-white whitespace-nowrap"
                     style={{
-                      border: '2px solid #e85d1a',
-                      color: '#e85d1a',
-                      borderRadius: '999px',
                       textDecoration: 'none'
-                    }}
-                    onMouseEnter={e => {
-                      (e.currentTarget as HTMLAnchorElement).style.backgroundColor = '#e85d1a';
-                      (e.currentTarget as HTMLAnchorElement).style.color = '#fff';
-                    }}
-                    onMouseLeave={e => {
-                      (e.currentTarget as HTMLAnchorElement).style.backgroundColor = 'transparent';
-                      (e.currentTarget as HTMLAnchorElement).style.color = '#e85d1a';
                     }}
                   >
                     Download CV
                   </a>
+                  {/* Mobile contact icons */}
+                  <div className="flex items-center gap-2 md:hidden">
+                    <a href="https://www.linkedin.com/in/sabithismail/" target="_blank" rel="noopener noreferrer" className="w-[36px] h-[36px] flex items-center justify-center rounded-full border-2 border-[#e85d1a]/20 text-[#e85d1a]">
+                      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+                    </a>
+                    <a href="mailto:sabithismail6679@gmail.com" className="w-[36px] h-[36px] flex items-center justify-center rounded-full border-2 border-[#e85d1a]/20 text-[#e85d1a]">
+                      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                    </a>
+                    <a href="tel:+97450371817" className="w-[36px] h-[36px] flex items-center justify-center rounded-full border-2 border-[#e85d1a]/20 text-[#e85d1a]">
+                      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    </a>
+                  </div>
                 </div>
               </motion.div>
             </div>
