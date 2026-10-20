@@ -133,7 +133,7 @@ function BuildingCard({ p }: { p: Project }) {
   const drift = useTransform(scrollYProgress, [0, 1], ["-4%", "4%"]);
 
   return (
-    <motion.div ref={ref} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.25 }}>
+    <motion.div ref={ref} className="min-w-0" initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.25 }}>
       <Link
         to={`/work/${p.slug}`}
         className="group block isolate overflow-hidden rounded-[28px] md:rounded-[40px] bg-[#141414] border border-white/10 md:hover:border-white/25 transition-colors"
@@ -146,9 +146,9 @@ function BuildingCard({ p }: { p: Project }) {
           </motion.div>
         </motion.div>
         {/* Title band: cream strip between the photo and the details. */}
-        <h3 className="bg-paper text-ink font-marsden font-semibold uppercase text-center tracking-tight leading-[0.92] text-5xl md:text-6xl xl:text-7xl px-4 md:px-5 pt-4 pb-3 md:pt-5 md:pb-4 overflow-hidden">
+        <h3 className="bg-paper text-ink font-shoulders font-extrabold uppercase text-center tracking-tight leading-[0.92] text-base px-4 md:px-5 pt-4 pb-3 md:pt-5 md:pb-4 overflow-hidden">
           <motion.span variants={rise} className="block">
-            {p.title}
+            <span data-fit className="inline-block whitespace-nowrap">{p.title}</span>
           </motion.span>
         </h3>
         <motion.div variants={fade} className="px-4 md:px-5 pt-4 pb-5">
@@ -172,7 +172,7 @@ function BuildingCard({ p }: { p: Project }) {
 function ToolCard({ p, index }: { p: Project; index: number }) {
   return (
     <motion.div
-      className="h-full"
+      className="h-full min-w-0"
       initial="hidden"
       whileInView="show"
       viewport={{ once: true, amount: 0.3 }}
@@ -188,7 +188,9 @@ function ToolCard({ p, index }: { p: Project; index: number }) {
           </motion.div>
         </motion.div>
         <div className="p-3 pb-4 md:p-5 flex flex-col flex-1">
-          <h3 className="-mx-3 -mt-3 md:-mx-5 md:-mt-5 mb-1 bg-paper text-ink px-3 md:px-5 pt-3 pb-2.5 md:pt-4 md:pb-3 font-marsden font-semibold uppercase text-center tracking-tight leading-[0.92] text-[26px] md:text-5xl">{p.title}</h3>
+          <h3 className="-mx-3 -mt-3 md:-mx-5 md:-mt-5 mb-1 bg-paper text-ink px-3 md:px-5 pt-3 pb-2.5 md:pt-4 md:pb-3 font-shoulders font-extrabold uppercase text-center tracking-tight leading-[0.92] text-base">
+            <span data-fit className="inline-block whitespace-nowrap">{p.title}</span>
+          </h3>
           <p className="label text-paper/55 mt-1.5">{p.software.slice(0, 2).join(" · ")}</p>
         </div>
         <span className="relative block h-12 md:h-14">
@@ -246,10 +248,50 @@ function useCoverFade() {
   return { pinRef, titleRef };
 }
 
+/**
+ * Card titles stay on one line at one shared size: the largest size at which every title in the
+ * group fits its card. Re-fitted when the width changes and once the web font has loaded.
+ */
+function useFitTitles() {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const root = ref.current;
+    if (!root) return;
+    const fit = () => {
+      const titles = [...root.querySelectorAll<HTMLElement>("[data-fit]")];
+      if (!titles.length) return;
+      titles.forEach((t) => (t.style.fontSize = "100px"));
+      let size = Infinity;
+      for (const t of titles) {
+        const box = t.parentElement!;
+        const cs = getComputedStyle(box);
+        const room = box.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+        size = Math.min(size, (room / t.offsetWidth) * 100);
+      }
+      titles.forEach((t) => (t.style.fontSize = `${Math.floor(size * 0.97)}px`));
+    };
+    fit();
+    document.fonts?.ready.then(fit).catch(() => undefined);
+    let width = 0;
+    const ro = new ResizeObserver(([e]) => {
+      if (Math.round(e.contentRect.width) === width) return;
+      width = Math.round(e.contentRect.width);
+      fit();
+    });
+    ro.observe(root);
+    return () => ro.disconnect();
+  }, []);
+
+  return ref;
+}
+
 export default function Work() {
   const buildings = projects.filter((p) => p.kind !== "Plugin");
   const tools = projects.filter((p) => p.kind === "Plugin");
   const { pinRef, titleRef } = useCoverFade();
+  const buildingsRef = useFitTitles();
+  const toolsRef = useFitTitles();
   return (
     <section id="work" className="relative isolate overflow-clip bg-ink wrap pt-12 md:pt-20 pb-14 md:pb-24">
       {/* One screen tall and pinned while the section scrolls past: cheap even on a long section. */}
@@ -266,14 +308,15 @@ export default function Work() {
         </h2>
       </div>
 
-      <div className="relative z-10 grid md:grid-cols-2 gap-6">
+      <div ref={buildingsRef} className="relative z-10 grid md:grid-cols-2 gap-6">
         {buildings.map((p) => (
           <BuildingCard key={p.slug} p={p} />
         ))}
       </div>
 
       <div className="relative z-10 mt-6 md:mt-10">
-        <div className="grid grid-cols-2 gap-3 md:gap-6">
+        {/* One column on phones so the one-line titles stay readable. */}
+        <div ref={toolsRef} className="grid sm:grid-cols-2 gap-6">
           {tools.map((p, i) => (
             <ToolCard key={p.slug} p={p} index={i} />
           ))}

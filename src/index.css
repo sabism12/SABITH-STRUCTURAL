@@ -1,14 +1,6 @@
 @import "tailwindcss";
 
-/* Work card titles: same face, weight and setting as the CPA Padel "LIVE MATCHES" heading. */
-@font-face {
-  font-family: "Marsden Slim";
-  src: url("/fonts/Marsden-S-SemiBold.woff2") format("woff2");
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-
+/* Condensed display face for the WORKS heading and the work card titles. */
 @font-face {
   font-family: "Big Shoulders Display";
   src: url("/fonts/BigShouldersDisplay-Variable.woff2") format("woff2");
@@ -19,7 +11,6 @@
 
 @theme {
   --font-shoulders: "Big Shoulders Display", "Arial Narrow", sans-serif;
-  --font-marsden: "Marsden Slim", "Arial Narrow", sans-serif;
   --font-sans: "General Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
 
   --color-ink: #0a0a0a;
