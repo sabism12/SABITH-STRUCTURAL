@@ -9,7 +9,16 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "Big Shoulders Display";
+  src: url("/fonts/BigShouldersDisplay-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
+  --font-shoulders: "Big Shoulders Display", "Arial Narrow", sans-serif;
   --font-marsden: "Marsden Slim", "Arial Narrow", sans-serif;
   --font-sans: "General Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
 

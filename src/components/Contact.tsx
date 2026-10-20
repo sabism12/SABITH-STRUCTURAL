@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLenis } from "lenis/react";
 import { profile } from "../data/content";
 import { MaskLines, Reveal } from "./Reveal";
+import ShaderBackground from "./ShaderBackground";
 
 export default function Contact() {
   const [copied, setCopied] = useState(false);
@@ -26,6 +27,9 @@ export default function Contact() {
 
   return (
     <footer id="contact" className="bg-black text-paper relative z-10 overflow-hidden">
+      <div aria-hidden className="absolute inset-0 -z-10 opacity-70 pointer-events-none">
+        <ShaderBackground variant="contours" />
+      </div>
       <div className="wrap pt-14 md:pt-20">
         <div className="grid-site gap-y-6">
           <p className="label text-white/55 col-span-4 md:col-span-3">(Contact)</p>

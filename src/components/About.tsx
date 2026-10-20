@@ -1,9 +1,16 @@
 import { profile, stats } from "../data/content";
 import { Reveal, ScrollWords } from "./Reveal";
+import ShaderBackground from "./ShaderBackground";
 
 export default function About() {
   return (
-    <section id="about" className="bg-ink wrap pt-16 md:pt-24 pb-10 md:pb-16">
+    <section id="about" className="relative isolate overflow-clip bg-ink wrap pt-16 md:pt-24 pb-10 md:pb-16">
+      {/* One screen tall and pinned while the section scrolls past: cheap even on a long section. */}
+      <div aria-hidden className="absolute inset-0 -z-10 pointer-events-none">
+        <div className="sticky top-0 h-[100svh] opacity-60">
+          <ShaderBackground variant="blueprint" />
+        </div>
+      </div>
       <p className="label text-white/55 mb-6 md:mb-10">(About)</p>
 
       <div className="grid-site gap-y-8 items-start">

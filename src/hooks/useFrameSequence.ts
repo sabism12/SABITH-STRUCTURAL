@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from "react";
 
 /**
  * Streams an image sequence in a coarse-to-fine order (first frame, every 10th, every 5th, ...)
- * so scrubbing works almost immediately and gets smoother as more frames arrive.
+ * so scrubbing works almost immediately and gets smoother as more frames arrive. Frames before
+ * `start` are never shown, so they are never downloaded.
  */
-export function useFrameSequence(frameCount: number, desktopBase: string, mobileBase: string) {
+export function useFrameSequence(frameCount: number, desktopBase: string, mobileBase: string, start = 0) {
   const framesRef = useRef<(HTMLImageElement | undefined)[]>([]);
   const [firstReady, setFirstReady] = useState(false);
   const listeners = useRef(new Set<() => void>());
@@ -16,7 +17,7 @@ export function useFrameSequence(frameCount: number, desktopBase: string, mobile
     const order: number[] = [];
     const seen = new Set<number>();
     for (const step of [frameCount, 10, 5, 2, 1]) {
-      for (let i = 0; i < frameCount; i += step) {
+      for (let i = start; i < frameCount; i += step) {
         if (!seen.has(i)) {
           seen.add(i);
           order.push(i);
@@ -34,12 +35,12 @@ export function useFrameSequence(frameCount: number, desktopBase: string, mobile
       img.onload = () => {
         if (cancelled) return;
         framesRef.current[index] = img;
-        if (index === 0) setFirstReady(true);
+        if (index === start) setFirstReady(true);
         listeners.current.forEach((fn) => fn());
         loadNext();
       };
       img.onerror = () => {
-        if (index === 0) setFirstReady(true);
+        if (index === start) setFirstReady(true);
         loadNext();
       };
     };
@@ -48,7 +49,7 @@ export function useFrameSequence(frameCount: number, desktopBase: string, mobile
     return () => {
       cancelled = true;
     };
-  }, [frameCount, desktopBase, mobileBase]);
+  }, [frameCount, desktopBase, mobileBase, start]);
 
   /** Nearest loaded frame to the one requested. */
   const getFrame = (index: number) => {

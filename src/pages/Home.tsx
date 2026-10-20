@@ -10,6 +10,7 @@ import Work from "../components/Work";
 import Experience from "../components/Experience";
 import Contact from "../components/Contact";
 import { useFrameSequence } from "../hooks/useFrameSequence";
+import { FRAME_COUNT, FRAME_START } from "../components/Hero";
 
 // The intro loader only runs on the first visit in a session's page load.
 let introShown = false;
@@ -17,7 +18,7 @@ let introShown = false;
 let savedScrollY = 0;
 
 export default function Home() {
-  const frames = useFrameSequence(150, "/images/hero-sequence", "/images/hero-sequence-mobile");
+  const frames = useFrameSequence(FRAME_COUNT, "/images/hero-sequence", "/images/hero-sequence-mobile", FRAME_START);
   const [loading, setLoading] = useState(!introShown);
   const { hash } = useLocation();
   const navigationType = useNavigationType();

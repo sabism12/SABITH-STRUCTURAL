@@ -4,7 +4,9 @@ import { profile } from "../data/content";
 import { MaskLines } from "./Reveal";
 import { useScrollToSection } from "./Nav";
 
-const FRAME_COUNT = 150;
+export const FRAME_COUNT = 150;
+// The sequence opens on bare gravel; start where the footings and starter bars are already in.
+export const FRAME_START = 33;
 
 // What the build sequence shows at each point (frame index ranges).
 const stages: [number, string][] = [
@@ -25,8 +27,8 @@ type Frames = {
 export default function Hero({ frames, ready }: { frames: Frames; ready: boolean }) {
   const sectionRef = useRef<HTMLElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const frameRef = useRef(0);
-  const [frame, setFrame] = useState(0);
+  const frameRef = useRef(FRAME_START);
+  const [frame, setFrame] = useState(FRAME_START);
   const scrollTo = useScrollToSection();
 
   useEffect(() => {
@@ -61,7 +63,7 @@ export default function Hero({ frames, ready }: { frames: Frames; ready: boolean
       const rect = section.getBoundingClientRect();
       const travel = rect.height - window.innerHeight;
       const p = travel > 0 ? Math.min(1, Math.max(0, -rect.top / travel)) : 0;
-      const next = Math.min(FRAME_COUNT - 1, Math.floor(p * FRAME_COUNT));
+      const next = Math.min(FRAME_COUNT - 1, FRAME_START + Math.floor(p * (FRAME_COUNT - FRAME_START)));
       if (next === frameRef.current) return;
       frameRef.current = next;
       setFrame(next);
@@ -83,7 +85,7 @@ export default function Hero({ frames, ready }: { frames: Frames; ready: boolean
   }, [frames]);
 
   const stage = [...stages].reverse().find(([start]) => frame >= start)![1];
-  const percent = Math.round((frame / (FRAME_COUNT - 1)) * 100);
+  const percent = Math.round(((frame - FRAME_START) / (FRAME_COUNT - 1 - FRAME_START)) * 100);
 
   const goWork = (e: MouseEvent) => {
     e.preventDefault();
@@ -91,7 +93,7 @@ export default function Hero({ frames, ready }: { frames: Frames; ready: boolean
   };
 
   return (
-    <section ref={sectionRef} className="relative h-[190vh] md:h-[220vh] bg-black" aria-label="Introduction">
+    <section ref={sectionRef} className="relative h-[160vh] md:h-[220vh] bg-black" aria-label="Introduction">
       {/* Phones: one clean column (animation, name, buttons). Desktop: name left, animation right. */}
       <div className="sticky top-0 h-[100svh] overflow-hidden flex flex-col pt-16 md:block md:pt-0">
         {/* Build sequence */}
@@ -118,7 +120,7 @@ export default function Hero({ frames, ready }: { frames: Frames; ready: boolean
                 </span>
                 {/* Phones: the build readout lives here instead of in its own corner. */}
                 <span className="md:hidden" aria-hidden>
-                  {frame < 3 ? "Scroll to build ↓" : `${stage} · ${percent}%`}
+                  {frame < FRAME_START + 3 ? "Scroll to build ↓" : `${stage} · ${percent}%`}
                 </span>
               </motion.p>
               {ready && (
@@ -160,7 +162,7 @@ export default function Hero({ frames, ready }: { frames: Frames; ready: boolean
           <span className="block mt-2 h-px w-28 bg-white/20 ml-auto relative overflow-hidden">
             <span className="absolute inset-y-0 left-0 bg-white" style={{ width: `${percent}%` }} />
           </span>
-          <span className="block mt-1 text-white/60">{frame < 3 ? "Scroll to build" : `${percent}%`}</span>
+          <span className="block mt-1 text-white/60">{frame < FRAME_START + 3 ? "Scroll to build" : `${percent}%`}</span>
         </motion.div>
       </div>
     </section>

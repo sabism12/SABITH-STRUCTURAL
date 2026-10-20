@@ -8,13 +8,22 @@ import { useEffect, useRef } from "react";
 const VERT = `attribute vec2 p; void main(){ gl_Position = vec4(p, 0.0, 1.0); }`;
 
 const FRAG = `
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
 precision mediump float;
+#endif
 uniform vec2 uRes;      // canvas size in device pixels
 uniform float uTime;
 uniform float uCell;    // glyph cell width in device pixels
 uniform sampler2D uGlyph;
 
-float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+// sin-free hash: the usual sin(dot()*43758) one collapses on phone GPUs with low-precision floats.
+float hash(vec2 p){
+  vec3 p3 = fract(vec3(p.xyx) * 0.1031);
+  p3 += dot(p3, p3.yzx + 33.33);
+  return fract((p3.x + p3.y) * p3.z);
+}
 float noise(vec2 p){
   vec2 i = floor(p), f = fract(p);
   vec2 u = f * f * (3.0 - 2.0 * f);

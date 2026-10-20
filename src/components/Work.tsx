@@ -1,10 +1,10 @@
-import { useRef } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { motion, useScroll, useTransform } from "motion/react";
 import { projects, specLabels, type Project } from "../data/content";
 import CodeVisual from "./CodeVisual";
 import { sizeOf } from "../data/imageSizes";
-import { MaskLines } from "./Reveal";
+import ShaderBackground from "./ShaderBackground";
 
 /** Full spec table, used on the case-study pages. */
 function Spec({ p, tone = "text-white/60" }: { p: Project; tone?: string }) {
@@ -59,7 +59,7 @@ const wipe = {
   show: { clipPath: "inset(0% 0% 0% 0%)", transition: { duration: 1.1, ease } },
 };
 const settle = {
-  hidden: { scale: 1.25 },
+  hidden: { scale: 1.12 },
   show: { scale: 1, transition: { duration: 1.6, ease } },
 };
 const rise = {
@@ -79,22 +79,68 @@ const label = {
   show: { opacity: 1, x: 0, transition: { duration: 0.5, delay: 0.9, ease } },
 };
 
+/**
+ * One heading line stretched to the full width of its box. Measured at 100px and scaled, re-fitted
+ * on resize and once the web font arrives. Slides in and settles into a forward slant.
+ */
+function FitLine({ children, delay = 0 }: { children: ReactNode; delay?: number }) {
+  const box = useRef<HTMLSpanElement>(null);
+  const text = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const fit = () => {
+      const b = box.current;
+      const t = text.current;
+      if (!b || !t) return;
+      t.style.fontSize = "100px";
+      // 0.95 leaves room for the slant, which pushes the tops of the letters sideways.
+      t.style.fontSize = `${Math.floor((b.clientWidth / t.offsetWidth) * 100 * 0.95)}px`;
+    };
+    fit();
+    document.fonts?.ready.then(fit);
+    let width = 0;
+    const ro = new ResizeObserver(([e]) => {
+      if (Math.round(e.contentRect.width) === width) return;
+      width = Math.round(e.contentRect.width);
+      fit();
+    });
+    if (box.current) ro.observe(box.current);
+    return () => ro.disconnect();
+  }, []);
+
+  return (
+    <span ref={box} className="block">
+      <motion.span
+        className="block origin-bottom-left"
+        initial={{ opacity: 0, x: "-8%", skewX: -24 }}
+        whileInView={{ opacity: 1, x: "0%", skewX: -10 }}
+        viewport={{ once: true, amount: 0.6 }}
+        transition={{ duration: 1, delay, ease }}
+      >
+        <span ref={text} className="inline-block whitespace-nowrap">
+          {children}
+        </span>
+      </motion.span>
+    </span>
+  );
+}
+
 /** Building: big image card, title band, one orange button. The whole card is the link. */
 function BuildingCard({ p }: { p: Project }) {
   const ref = useRef<HTMLDivElement>(null);
   // While the card passes through the screen the photo drifts a little: depth without a gimmick.
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const drift = useTransform(scrollYProgress, [0, 1], ["-7%", "7%"]);
+  const drift = useTransform(scrollYProgress, [0, 1], ["-4%", "4%"]);
 
   return (
     <motion.div ref={ref} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.25 }}>
       <Link
         to={`/work/${p.slug}`}
-        className="group block overflow-hidden bg-[#141414] -mx-4 md:mx-0 md:border md:border-white/10 md:hover:border-white/25 transition-colors"
+        className="group block isolate overflow-hidden rounded-[28px] md:rounded-[40px] bg-[#141414] border border-white/10 md:hover:border-white/25 transition-colors"
       >
-        <motion.div variants={wipe} className="relative aspect-[4/3.3] md:aspect-[4/3] overflow-hidden">
+        <motion.div variants={wipe} className="relative aspect-[3/2] overflow-hidden">
           <motion.div variants={settle} className="absolute inset-0">
-            <motion.div style={{ y: drift }} className="absolute -inset-y-[8%] inset-x-0">
+            <motion.div style={{ y: drift }} className="absolute -inset-y-[5%] inset-x-0">
               <Visual p={p} className="absolute inset-0 size-full" />
             </motion.div>
           </motion.div>
@@ -134,9 +180,9 @@ function ToolCard({ p, index }: { p: Project; index: number }) {
     >
       <Link
         to={`/work/${p.slug}`}
-        className="group flex flex-col h-full overflow-hidden bg-[#141414] border border-white/10 hover:border-white/25 transition-colors"
+        className="group flex flex-col h-full isolate overflow-hidden rounded-[22px] md:rounded-[40px] bg-[#141414] border border-white/10 hover:border-white/25 transition-colors"
       >
-        <motion.div variants={wipe} className="relative aspect-square md:aspect-[16/10] overflow-hidden bg-[#1b2129]">
+        <motion.div variants={wipe} className="relative aspect-[3/2] overflow-hidden bg-[#1b2129]">
           <motion.div variants={settle} className="absolute inset-0">
             <Visual p={p} className="absolute inset-0 size-full" />
           </motion.div>
@@ -157,26 +203,76 @@ function ToolCard({ p, index }: { p: Project; index: number }) {
   );
 }
 
+/**
+ * Like the CPA padel headline: the title pins under the top bar while the cards scroll up over it,
+ * fading out and shrinking a little as they cover it. Sticky positioning does the pinning (smooth
+ * on iPhone too); this only writes the fade and scale, once per frame, with no React re-render.
+ */
+function useCoverFade() {
+  const pinRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const pin = pinRef.current;
+      const title = titleRef.current;
+      const cover = pin?.nextElementSibling as HTMLElement | null;
+      if (!pin || !title || !cover) return;
+      const r = pin.getBoundingClientRect();
+      const height = Math.max(1, r.height);
+      // 0 while the cards are still below the title, 1 once they cover it.
+      const progress = Math.min(1, Math.max(0, (r.top + height - cover.getBoundingClientRect().top) / height));
+      title.style.opacity = String(1 - progress);
+      title.style.transform = reduce ? "" : `scale(${1 - progress * 0.12})`;
+      title.style.visibility = progress >= 1 ? "hidden" : "visible";
+    };
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    document.fonts?.ready.then(update).catch(() => undefined);
+    return () => {
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, []);
+
+  return { pinRef, titleRef };
+}
+
 export default function Work() {
   const buildings = projects.filter((p) => p.kind !== "Plugin");
   const tools = projects.filter((p) => p.kind === "Plugin");
+  const { pinRef, titleRef } = useCoverFade();
   return (
-    <section id="work" className="bg-ink wrap pt-12 md:pt-20 pb-14 md:pb-24">
-      <div className="grid-site gap-y-6 mb-10 md:mb-16">
-        <p className="label text-white/60 col-span-2 md:col-span-3">(Work — {String(projects.length).padStart(2, "0")})</p>
-        <p className="label text-white/60 col-span-2 md:col-span-2 md:col-start-11 text-right tabular-nums">/ 2024–26 /</p>
-        <h2 className="col-span-4 md:col-span-9 md:col-start-4 md:row-start-1 display text-[12vw] md:text-[6.4vw]">
-          <MaskLines lines={["Buildings designed,", "tools built."]} />
+    <section id="work" className="relative isolate overflow-clip bg-ink wrap pt-12 md:pt-20 pb-14 md:pb-24">
+      {/* One screen tall and pinned while the section scrolls past: cheap even on a long section. */}
+      <div aria-hidden className="absolute inset-0 -z-10 pointer-events-none">
+        <div className="sticky top-0 h-[100svh] opacity-60">
+          <ShaderBackground variant="blueprint" />
+        </div>
+      </div>
+      {/* Title: one heavy word in a slanted condensed face, stretched to the full width. It pins and
+          fades back as the first card scrolls over it. */}
+      <div ref={pinRef} className="sticky top-16 md:top-20 z-0 pointer-events-none">
+        <h2 ref={titleRef} className="origin-top will-change-[opacity,transform] font-shoulders font-black uppercase text-paper leading-[0.84] tracking-[-0.01em] pb-6 md:pb-12">
+          <FitLine>Works</FitLine>
         </h2>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="relative z-10 grid md:grid-cols-2 gap-6">
         {buildings.map((p) => (
           <BuildingCard key={p.slug} p={p} />
         ))}
       </div>
 
-      <div className="mt-6 md:mt-10">
+      <div className="relative z-10 mt-6 md:mt-10">
         <div className="grid grid-cols-2 gap-3 md:gap-6">
           {tools.map((p, i) => (
             <ToolCard key={p.slug} p={p} index={i} />
